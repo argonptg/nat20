@@ -3,8 +3,10 @@ import { sqliteTable, integer, text, unique, primaryKey } from 'drizzle-orm/sqli
 export const users = sqliteTable('users', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     username: text('username').notNull().unique(),
+    email: text('email').notNull().unique(),
     desc: text('desc'),
     hash: text('hash').notNull(),
+    sessionToken: text('session_token'),
 });
 
 export const characters = sqliteTable('characters', {
