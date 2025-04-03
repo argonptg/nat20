@@ -15,15 +15,18 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	default: async (event) => {
-		const form = await superValidate(event, zod(registerForm));
+    default: async (event) => {
+        // Validação do formulário de registro
+        const form = await superValidate(event, zod(registerForm));
 
-		if (!form.valid) return fail(400, { form });
+        if (!form.valid) return fail(400, { form });
+        // Confirmação de senha deve ser igual
         if (form.data.password !== form.data.passwordConfirm) return fail(400, { form });
 
-        // hashing is cool :sunglasses:
+        // Cria hash seguro da senha com Argon2
         const hash = await argon2.hash(form.data.password);
 
+        // Cria objeto de usuário para inserção
         const user: typeof users.$inferInsert = {
             username: form.data.username,
             email: form.data.email,
@@ -31,8 +34,8 @@ export const actions: Actions = {
             desc: "",
         }
 
+        // Insere usuário no banco de dados
         await db.insert(users).values(user);
-        console.log(`DING DONG MOTHERFUCKER A USER REGISTERED! \nUsername: ${form.data.username}\n==========================`)
         
         return redirect(303, "/login");
     }

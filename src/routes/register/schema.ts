@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Esquema de validação para registro de usuários
 export const registerForm = z.object({
     username: z.string()
         .min(2, "Username must be at least 2 characters")

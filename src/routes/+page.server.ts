@@ -1,17 +1,21 @@
 export const load = ({ locals, cookies }) => {
+    // Verifica se existe um cookie de sessão
     const isLogged = cookies.get("session");
 
+    // Se o usuário estiver autenticado
     if (isLogged) {
         return {
             loggedIn: true,
-            profile: locals.auth
+            profile: locals.auth  // Retorna os dados do usuário armazenados no hook
         }
     }
 
-    locals.auth = null; // just for good measure
+    // Limpa qualquer dado de autenticação residual
+    locals.auth = null;
 
+    // Retorna estado não autenticado
     return {
         loggedIn: false,
-        profile: {}
+        profile: {}  // Objeto vazio para evitar erros em componentes
     }
 }

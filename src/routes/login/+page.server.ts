@@ -11,46 +11,40 @@ import { eq } from 'drizzle-orm';
 import { gzipSync } from 'zlib';
 import { PRODUCTION } from '$env/static/private';
 
+// Função para configurar o cookie de sessão de forma segura
 function setCookie(event: RequestEvent, cookie: string, auth: Auth) {
-    console.log("Setting cookie:", cookie); // Debugging
-
-    event.locals.auth = auth; // Ensure we store user data in locals
+    event.locals.auth = auth;
 
     event.cookies.set("session", cookie, {
-        httpOnly: true,
-        secure: Boolean(PRODUCTION), // Auto-switch based on environment
+        httpOnly: true,  // Cookie inacessível via JavaScript
+        secure: Boolean(PRODUCTION), // HTTPS apenas em produção
         path: "/",
-        sameSite: "lax", // Helps prevent CSRF issues
-        maxAge: 60 * 60 * 24 * 60 // 60 days in seconds
+        sameSite: "lax", // Prevenção básica de CSRF
+        maxAge: 60 * 60 * 24 * 60 // 60 dias
     });
-
-    console.log("Cookie set successfully!"); // Debugging
 }
 
-export const load: PageServerLoad = async () => {
-	return {
-		form: await superValidate(zod(loginForm))
-	};
-};
-
 export const actions: Actions = {
-	default: async (event) => {
-		const form = await superValidate(event, zod(loginForm));
+    default: async (event) => {
+        // Validação do formulário com Zod
+        const form = await superValidate(event, zod(loginForm));
 
-		if (!form.valid) return fail(400, { form });
+        if (!form.valid) return fail(400, { form });
 
+        // Busca usuário pelo email
         const row = await db
             .select()
             .from(users)
             .where(eq(users.email, form.data.email))
             .execute()
 
+        // Verifica a senha com Argon2
         const isValid = await argon2.verify(row[0].hash, form.data.password)
 
         if (isValid) {
             const { hash, ...dataSafe } = row[0]; 
 
-            // if no cookie me hungy :(
+            // Gera novo token se não existir
             if (!row[0].sessionToken) {
                 const randomByte = randomBytes(32).toString("hex");
                 const gzipped = gzipSync(JSON.stringify(dataSafe)).toString("base64");
@@ -58,19 +52,25 @@ export const actions: Actions = {
                 
                 setCookie(event, cookie, dataSafe);
     
+                // Atualiza o token no banco de dados
                 await db
                     .update(users)
                     .set({ sessionToken: cookie })
                     .where(eq(users.email, form.data.email));
                 
-                console.log(`DING DONG MOTHERFUCKER A USER LOGGED IN! \nUsername: ${row[0].username}\n==========================`)
                 return redirect(303, "/dashboard");
             }
 
+            // Reutiliza token existente
             setCookie(event, row[0].sessionToken, dataSafe);
-            console.log(`DING DONG MOTHERFUCKER A USER LOGGED IN! \nUsername: ${row[0].username}\n==========================`)
             
             return redirect(303, "/dashboard");
         }
-	}
+    }
+};
+
+export const load: PageServerLoad = async () => {
+	return {
+		form: await superValidate(zod(loginForm))
+	};
 };

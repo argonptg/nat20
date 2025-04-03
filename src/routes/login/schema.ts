@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Esquema de validação para login
 export const loginForm = z.object({
     email: z.string().email("Email is invalid"),
     password: z.string()
