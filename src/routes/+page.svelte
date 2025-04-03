@@ -3,6 +3,8 @@
     import { Sword } from "@lucide/svelte/icons";
     import ModeSwitcher from "$lib/components/reusable/ModeSwitcher.svelte";
     import Logo from "$lib/components/reusable/Logo.svelte";
+
+    let { data } = $props();
 </script>
 
 <style>
@@ -38,12 +40,18 @@
     
     <!-- login buttons -->
     <div class="flex flex-row items-center space-x-5 mr-5">
-        <Button class="h-8" href="https://example.com">
+        {#if !data.loggedIn}
+          <Button class="h-8" href="/login">
             Login
-        </Button>        
-        <Button class="h-8" variant="outline" href="/register">
-            Register
-        </Button>
+          </Button>        
+          <Button class="h-8" variant="outline" href="/register">
+              Register
+          </Button>
+        {:else}
+          <Button class="h-8" href="/dashboard">
+            Dashboard
+          </Button>
+        {/if}
         <ModeSwitcher />
     </div>
 </nav>

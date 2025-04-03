@@ -1,5 +1,5 @@
 import type { PageServerLoad, Actions } from './$types.js';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { registerForm } from './schema';
@@ -26,11 +26,14 @@ export const actions: Actions = {
 
         const user: typeof users.$inferInsert = {
             username: form.data.username,
+            email: form.data.email,
             hash: hash,
             desc: "",
         }
 
         await db.insert(users).values(user);
         console.log(`DING DONG MOTHERFUCKER A USER REGISTERED! \nUsername: ${form.data.username}\n==========================`)
-	}
+        
+        return redirect(303, "/login");
+    }
 };
