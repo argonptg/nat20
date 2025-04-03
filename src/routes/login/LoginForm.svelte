@@ -34,5 +34,5 @@
 			{/snippet}
 		</Form.Control>
 	</Form.Field>
-	<Form.Button class="mt-5 w-full">Register</Form.Button>
+	<Form.Button class="mt-5 w-full">Log in</Form.Button>
 </form>
