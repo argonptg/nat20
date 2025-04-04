@@ -3,8 +3,9 @@
         {
             "previewLimit": 50,
             "driver": "SQLite",
-            "name": "Nat20",
-            "database": "${workspaceFolder:nat20}/db/local.db"
+            "database": "${workspaceFolder:nat20}/local.db",
+            "name": "Nat20"
         }
-    ]
+    ],
+    "sqltools.useNodeRuntime": true
 }
